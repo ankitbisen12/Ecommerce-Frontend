@@ -1,14 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { resetCart } from "../Cart/cartAPI";
+import { resetPasswordRequestAsync, selectMailSent } from "./authSlice";
 
 const ForgotPassword = () => {
+  const mailSent = useSelector(selectMailSent);
+  const dispatch = useDispatch();
   const {
     register,
     handleSubmit,
     formState: { errors },
-    reset
+    reset,
   } = useForm();
 
   return (
@@ -30,9 +33,11 @@ const ForgotPassword = () => {
             className="space-y-6"
             action="#"
             method="POST"
-            onSubmit={handleSubmit((data) => {console.log(data)
-                //TODO: implementation on backend with email
-                reset();
+            onSubmit={handleSubmit((data) => {
+              //console.log(data);
+              //TODO: implementation on backend with email
+              dispatch(resetPasswordRequestAsync(data.email));
+              reset();
             })}
           >
             <div>
@@ -58,6 +63,7 @@ const ForgotPassword = () => {
                 {errors.email && (
                   <p className="text-red-500">{errors.email.message}</p>
                 )}
+                {mailSent && <p className="text-green-500">Reset Mail Sent</p>}
               </div>
             </div>
 

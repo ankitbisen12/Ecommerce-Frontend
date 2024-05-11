@@ -13,24 +13,39 @@ const initialState = {
 
 export const fetchLoggedInUserOrdersAsync = createAsyncThunk(
   "user/fetchLoggedInUserOrders",
-  async (id) => {
-    const response = await fetchLoggedInUserOrders(id);
+  async () => {
+    const response = await fetchLoggedInUserOrders();
     return response.data;
   }
 );
 
 export const fetchLoggedInUserAsync = createAsyncThunk(
   "user/fetchLoggedInUser",
-  async (id) => {
-    const response = await fetchLoggedInUser(id);
+  async () => {
+    const response = await fetchLoggedInUser();
     return response.data;
   }
 );
 
 export const updateUserAsync = createAsyncThunk(
   "user/updateUser",
-  async (update) => {
+  async ({ update, toast, message }) => {
     const response = await updateUser(update);
+    if (message === "Add Address") {
+      toast.success("Address added successfully", {
+        position: toast.POSITION.TOP_CENTER,
+      });
+    }
+    if (message === "Address Deleted") {
+      toast.error("Address deleted successfully", {
+        position: toast.POSITION.TOP_CENTER,
+      });
+    }
+    if (message === "Address Edited") {
+      toast.success("Address edit successfully", {
+        position: toast.POSITION.TOP_CENTER,
+      });
+    }
     return response.data;
   }
 );
@@ -72,9 +87,9 @@ export const userSlice = createSlice({
   },
 });
 
-//TODO: change Orders and address to be independent of user.
+//TODO: change Orders and address to be independent of user.  //done
 export const selectUserOrders = (state) => state.user.userInfo.orders;
-
 export const selectUserInfo = (state) => state.user.userInfo;
+export const selectedStatus = (state)=>state.user.status;
 
 export default userSlice.reducer;

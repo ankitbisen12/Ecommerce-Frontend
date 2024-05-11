@@ -1,11 +1,13 @@
+import React from "react";
 import AdminOrders from "../features/admin/AdminOrders";
 import Navbar from "./NavBar/Navbar";
 
 const AdminOrderPage = () => {
   return (
-    <Navbar>
+    <React.Fragment>
+      <Navbar></Navbar>
       <AdminOrders />
-    </Navbar>
+    </React.Fragment>
   );
 };
 

@@ -3,9 +3,9 @@ import SignUp from "../../features/auth/SignUp";
 
 const SignUpPage = () => {
   return (
-    <div>
+    <React.Fragment>
       <SignUp />
-    </div>
+    </React.Fragment>
   );
 };
 

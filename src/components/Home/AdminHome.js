@@ -4,11 +4,10 @@ import AdminProductList from "../../features/admin/AdminProductList";
 
 const AdminHome = () => {
   return (
-    <div>
-      <Navbar>
-        <AdminProductList></AdminProductList>
-      </Navbar>
-    </div>
+    <React.Fragment>
+      <Navbar></Navbar>
+      <AdminProductList></AdminProductList>
+    </React.Fragment>
   );
 };
 

@@ -5,12 +5,12 @@ import Footer from "../Footer/footer";
 
 const ProductDetailPage = () => {
   return (
-    <Fragment>
+    <React.Fragment>
       <Navbar>
-        <ProductDetail />
       </Navbar>
+        <ProductDetail />
       <Footer />
-    </Fragment>
+    </React.Fragment>
   );
 };
 

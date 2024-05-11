@@ -1,15 +1,26 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { addToCart, deleteItemFromCart, fetchItemsByUserId, resetCart, updateCart } from "./cartAPI";
+import {
+  addToCart,
+  deleteItemFromCart,
+  fetchItemsByUserId,
+  resetCart,
+  updateCart,
+} from "./cartAPI";
 
 const initialState = {
   status: "idle",
   items: [],
+  cartLoaded: false,
 };
 
 export const addToCartAsync = createAsyncThunk(
   "cart/addToCart",
-  async (item) => {
+  async ({ item, toast }) => {
+    // console.log("item",item);
     const response = await addToCart(item);
+    toast.success("Item Added successfully", {
+      position: toast.POSITION.BOTTOM_CENTER,
+    });
     // The value we return becomes the `fulfilled` action payload
     return response.data;
   }
@@ -17,8 +28,8 @@ export const addToCartAsync = createAsyncThunk(
 
 export const fetchItemsByUserIdAsync = createAsyncThunk(
   "cart/fetchItemsByUserId",
-  async (item) => {
-    const response = await fetchItemsByUserId(item);
+  async () => {
+    const response = await fetchItemsByUserId();
     // The value we return becomes the `fulfilled` action payload
     return response.data;
   }
@@ -28,6 +39,16 @@ export const updateCartAsync = createAsyncThunk(
   "cart/updateCart",
   async (update) => {
     const response = await updateCart(update);
+    update.toast.success("Quantity updated Successfully", {
+      position: update.toast.POSITION.TOP_CENTER,
+      autoClose: 1000,
+      hideProgressBar: false,
+      closeOnClick: true,
+      pauseOnHover: true,
+      draggable: true,
+      progress: undefined,
+    });
+    // console.log("updateCart",update);
     // The value we return becomes the `fulfilled` action payload
     return response.data;
   }
@@ -42,22 +63,19 @@ export const deleteItemFromCartAsync = createAsyncThunk(
   }
 );
 
-export const resetCartAsync = createAsyncThunk(
-  "cart/resetCart",
-  async (userId) => {
-    const response = await  resetCart(userId);
-    // The value we return becomes the `fulfilled` action payload
-    return response.data;
-  }
-);
+export const resetCartAsync = createAsyncThunk("cart/resetCart", async () => {
+  const response = await resetCart();
+  // The value we return becomes the `fulfilled` action payload
+  return response.data;
+});
 
-export const authSlice = createSlice({
+export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    increment: (state) => {
-      state.value += 1;
-    },
+    // increment: (state) => {
+    //   state.value += 1;
+    // },
   },
   extraReducers: (builder) => {
     builder
@@ -74,6 +92,11 @@ export const authSlice = createSlice({
       .addCase(fetchItemsByUserIdAsync.fulfilled, (state, action) => {
         state.status = "idle";
         state.items = action.payload;
+        state.cartLoaded = true;
+      })
+      .addCase(fetchItemsByUserIdAsync.rejected, (state, action) => {
+        state.status = "idle";
+        state.cartLoaded = true;
       })
       .addCase(updateCartAsync.pending, (state) => {
         state.status = "loading";
@@ -84,7 +107,8 @@ export const authSlice = createSlice({
           (item) => item.id === action.payload.id
         );
         state.items[index] = action.payload;
-      }).addCase(deleteItemFromCartAsync.pending, (state) => {
+      })
+      .addCase(deleteItemFromCartAsync.pending, (state) => {
         state.status = "loading";
       })
       .addCase(deleteItemFromCartAsync.fulfilled, (state, action) => {
@@ -92,20 +116,22 @@ export const authSlice = createSlice({
         const index = state.items.findIndex(
           (item) => item.id === action.payload.id
         );
-        state.items.splice(index,1);
-      }).addCase(resetCartAsync.pending, (state) => {
+        state.items.splice(index, 1);
+      })
+      .addCase(resetCartAsync.pending, (state) => {
         state.status = "loading";
       })
       .addCase(resetCartAsync.fulfilled, (state, action) => {
         state.status = "idle";
-        state.items =[];
-      })
+        state.items = [];
+      });
   },
 });
 
-export const { increment } = authSlice.actions;
+// export const { increment } = authSlice.actions;
 
 export const selectItems = (state) => state.cart.items;
-export const selectCartStatus = state=>state.cart.status;
+export const selectCartStatus = (state) => state.cart.status;
+export const selectCartLoaded = (state) => state.cart.cartLoaded;
 
-export default authSlice.reducer;
+export default cartSlice.reducer;

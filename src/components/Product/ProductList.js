@@ -1,15 +1,13 @@
 import React, { useState, Fragment, useEffect } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { Dialog, Disclosure, Menu, Transition } from "@headlessui/react";
-import { XMarkIcon } from "@heroicons/react/24/outline";
-import { StarIcon } from "@heroicons/react/20/solid";
-
+import { ImCross } from "react-icons/im";
+import { FaPlus, FaMinus } from "react-icons/fa6";
+import { RotatingLines } from "react-loader-spinner";
 import {
   ChevronDownIcon,
-  FunnelIcon,
   MinusIcon,
   PlusIcon,
-  Squares2X2Icon,
 } from "@heroicons/react/20/solid";
 import { Link } from "react-router-dom";
 import {
@@ -20,94 +18,55 @@ import {
   selectCategories,
   selectTotalItems,
   selectedStatus,
-  selectProducts
+  selectProducts,
 } from "../../features/product/ProductListSlice";
-
-import { ITEMS_PER_PAGE, discountedPrice } from "../../app/constant";
+import { ITEMS_PER_PAGE, getDaySuffix } from "../../common/constant";
 import { Pagination } from "../../common/Pagination";
-import { ColorRing } from "react-loader-spinner";
+
+import { getNextDatePlusFive } from "../../common/constant";
 
 const sortOptions = [
-  { name: "Best Rating", sort: "rating", order: "desc", current: false },
-  { name: "Price: Low to High", sort: "price", order: "asc", current: false },
-  { name: "Price: High to Low", sort: "price", order: "desc", current: false },
+  { name: "Best Rating", sort: "rating", order: "asc", current: false },
+  {
+    name: "Price: Low to High",
+    sort: "discountPrice",
+    order: "asc",
+    current: false,
+  },
+  {
+    name: "Price: High to Low",
+    sort: "discountPrice",
+    order: "desc",
+    current: false,
+  },
 ];
 
-const filters = [
-  {
-    id: "category",
-    name: "category",
-    options: [
-      { value: "smartphones", label: "smartphones", checked: false },
-      { value: "laptops", label: "laptops", checked: false },
-      { value: "fragrances", label: "fragrances", checked: false },
-      { value: "skincare", label: "skincare", checked: false },
-      { value: "groceries", label: "groceries", checked: false },
-      { value: "home-decoration", label: "home decoration", checked: false },
-    ],
-  },
-  {
-    id: "Brand",
-    name: "Brands",
-    options: [
-      { value: "Apple", label: "Apple", checked: false },
-      { value: "Samsung", label: "Samsung", checked: false },
-      { value: "OPPO", label: "OPPO", checked: false },
-      { value: "Huawei", label: "Huawei", checked: false },
-      {
-        value: "Microsoft Surface",
-        label: "Microsoft Surface",
-        checked: false,
-      },
-      { value: "Infinix", label: "Infinix", checked: false },
-      { value: "HP Pavilion", label: "HP Pavilion", checked: false },
-      {
-        value: "Impression of Acqua Di Gio",
-        label: "Impression of Acqua Di Gio",
-        checked: false,
-      },
-      { value: "Royal_Mirage", label: "Royal_Mirage", checked: false },
-      {
-        value: "Fog Scent Xpressio",
-        label: "Fog Scent Xpressio",
-        checked: false,
-      },
-      { value: "Al Munakh", label: "Al Munakh", checked: false },
-      {
-        value: "Lord - Al-Rehab",
-        label: "Lord   Al Rehab",
-        checked: false,
-      },
-      { value: "L'Oreal Paris", label: "L'Oreal Paris", checked: false },
-      { value: "Hemani Tea", label: "Hemani Tea", checked: false },
-      { value: "Dermive", label: "Dermive", checked: false },
-      {
-        value: "ROREC White Rice",
-        label: "ROREC White Rice",
-        checked: false,
-      },
-      { value: "Fair & Clear", label: "Fair & Clear", checked: false },
-      { value: "Saaf & Khaas", label: "Saaf & Khaas", checked: false },
-      {
-        value: "Bake Parlor Big",
-        label: "Bake Parlor Big",
-        checked: false,
-      },
-      {
-        value: "Baking Food Items",
-        label: "Baking Food Items",
-        checked: false,
-      },
-      { value: "fauji", label: "fauji", checked: false },
-      { value: "Dry Rose", label: "Dry Rose", checked: false },
-      { value: "Boho Decor", label: "Boho Decor", checked: false },
-      { value: "Flying Wooden", label: "Flying Wooden", checked: false },
-      { value: "LED Lights", label: "LED Lights", checked: false },
-      { value: "luxury palace", label: "luxury palace", checked: false },
-      { value: "Golden", label: "Golden", checked: false },
-    ],
-  },
-];
+// const filters = [
+//   {
+//     id: "Category",
+//     name: "Category",
+//     options: [
+//       { value: "SmartWatch", label: "SmartWatch", checked: false },
+//       { value: "Hoddies", label: "Hoddies", checked: false },
+//       { value: "Cargo Pants", label: "Cargo Pants", checked: false },
+//       { value: "Jeans", label: "Jeans", checked: false },
+//       { value: "Tshirts", label: "Tshirts", checked: false },
+//     ],
+//   },
+//   {
+//     id: "Brand",
+//     name: "Brands",
+//     options: [
+//       { value: "Realme", label: "Realme", checked: false },
+//       { value: "Fire bolt", label: "Fire bolt", checked: false },
+//       { value: "Roadster", label: "Roadster", checked: false },
+//       { value: "Bewakoof", label: "Bewakoof", checked: false },
+//       { value: "Highlander", label: "Highlander", checked: false },
+//       { value: "Ether", label: "Ether", checked: false },
+//       { value: "Locomotive", label: "Locomotive", checked: false },
+//     ],
+//   },
+// ];
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -758,11 +717,11 @@ const ProductList = () => {
   const filters = [
     {
       id: "category",
-      name: "category",
+      name: "Category",
       options: categories,
     },
     {
-      id: "Brand",
+      id: "brand",
       name: "Brands",
       options: brands,
     },
@@ -772,6 +731,7 @@ const ProductList = () => {
     // e.preventDefault();
     // console.log(section,option);
     let newFilter = { ...filter };
+
     //TODO: On server it will support multiple categories.
     if (e.target.checked) {
       if (newFilter[section.id]) {
@@ -785,18 +745,18 @@ const ProductList = () => {
       );
       newFilter[section.id].splice(index, 1);
     }
-    console.log({ newFilter });
+    // console.log({ newFilter });
     setFilter(newFilter);
   };
 
   const handleSort = (e, option) => {
     const sort = { _sort: option.sort, _order: option.order };
-    console.log({ sort });
+    // console.log({ sort });
     setSort(sort);
   };
 
   const handlePage = (page) => {
-    console.log({ page });
+    // console.log({ page });
     setPage(page);
   };
 
@@ -817,7 +777,7 @@ const ProductList = () => {
   }, [dispatch]);
 
   return (
-    <div className="bg-white">
+    <div className="bg-white max-w-9xl">
       <div>
         {/* Mobile filter dialog */}
         <MobileFilter
@@ -827,19 +787,19 @@ const ProductList = () => {
           filters={filters}
         ></MobileFilter>
 
-        <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-          <div className="flex items-baseline justify-between border-b border-gray-200 pb-6 pt-24">
-            <h1 className="text-4xl font-bold tracking-tight text-gray-900">
+        <main className="mx-auto px-2 sm:px-6 lg:px-8">
+          <div className="flex items-baseline justify-between pb-6 pt-4 lg:pt-8">
+            <h1 className="text-lg sm:text-xl md:text-2xl lg:text-4xl font-bold tracking-tight border-b-4 border-blue-900 pb-2 lg:pb-4 text-blue-900">
               All Products
             </h1>
 
             <div className="flex items-center">
               <Menu as="div" className="relative inline-block text-left">
-                <div>
-                  <Menu.Button className="group inline-flex justify-center text-sm font-medium text-gray-700 hover:text-gray-900">
-                    Sort
+                <div className="p-2">
+                  <Menu.Button className="group inline-flex justify-center text-md lg:text-2xl py-1 px-2 lg:px-4 font-normal text-gray-700 border border-gray-200 hover:text-gray-900">
+                    Sort by:
                     <ChevronDownIcon
-                      className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-gray-400 group-hover:text-gray-500"
+                      className="-mr-1 ml-1 h-5 w-5 flex-shrink-0 text-2xl text-gray-400 group-hover:text-gray-500"
                       aria-hidden="true"
                     />
                   </Menu.Button>
@@ -854,7 +814,7 @@ const ProductList = () => {
                   leaveFrom="transform opacity-100 scale-100"
                   leaveTo="transform opacity-0 scale-95"
                 >
-                  <Menu.Items className="absolute right-0 z-10 mt-2 w-40 origin-top-right rounded-md bg-white shadow-2xl ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <Menu.Items className="absolute right-0 z-10 mt-2 w-60 origin-top-right rounded-md bg-white shadow-2xl  focus:outline-none">
                     <div className="py-1">
                       {sortOptions.map((option) => (
                         <Menu.Item key={option.name}>
@@ -863,10 +823,10 @@ const ProductList = () => {
                               onClick={(e) => handleSort(e, option)}
                               className={classNames(
                                 option.current
-                                  ? "font-medium cursor-pointer text-gray-900"
-                                  : "text-gray-500",
+                                  ? "font-semibold cursor-pointer text-gray-900"
+                                  : "text-gray-700",
                                 active ? "bg-gray-100" : "",
-                                "block px-4 py-2 text-sm"
+                                "block px-4 py-2 text-lg cursor-pointer"
                               )}
                             >
                               {option.name}
@@ -881,23 +841,23 @@ const ProductList = () => {
 
               <button
                 type="button"
-                className="-m-2 ml-5 p-2 text-gray-400 hover:text-gray-500 sm:ml-7"
-              >
-                <span className="sr-only">View grid</span>
-                <Squares2X2Icon className="h-5 w-5" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                className="-m-2 ml-4 p-2 text-gray-400 hover:text-gray-500 sm:ml-6 lg:hidden"
+                className="-m-2 p-2 text-gray-400 hover:text-gray-500  lg:hidden"
                 onClick={() => setMobileFiltersOpen(true)}
               >
                 <span className="sr-only">Filters</span>
-                <FunnelIcon className="h-5 w-5" aria-hidden="true" />
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-8 h-8 text-blue-900"
+                >
+                  <path d="M18.75 12.75h1.5a.75.75 0 0 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM12 6a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 6ZM12 18a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 12 18ZM3.75 6.75h1.5a.75.75 0 1 0 0-1.5h-1.5a.75.75 0 0 0 0 1.5ZM5.25 18.75h-1.5a.75.75 0 0 1 0-1.5h1.5a.75.75 0 0 1 0 1.5ZM3 12a.75.75 0 0 1 .75-.75h7.5a.75.75 0 0 1 0 1.5h-7.5A.75.75 0 0 1 3 12ZM9 3.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5ZM12.75 12a2.25 2.25 0 1 1 4.5 0 2.25 2.25 0 0 1-4.5 0ZM9 15.75a2.25 2.25 0 1 0 0 4.5 2.25 2.25 0 0 0 0-4.5Z" />
+                </svg>
               </button>
             </div>
           </div>
 
-          <section aria-labelledby="products-heading" className="pb-24 pt-6">
+          <section aria-labelledby="products-heading" className="pb-6 ">
             <h2 id="products-heading" className="sr-only">
               Products
             </h2>
@@ -965,43 +925,35 @@ const MobileFilter = (props) => {
           >
             <Dialog.Panel className="relative ml-auto flex h-full w-full max-w-xs flex-col overflow-y-auto bg-white py-4 pb-12 shadow-xl">
               <div className="flex items-center justify-between px-4">
-                <h2 className="text-lg font-medium text-gray-900">Filters</h2>
+                <h2 className="text-2xl font-semibold text-gray-900">
+                  Filters
+                </h2>
                 <button
                   type="button"
-                  className="-mr-2 flex h-10 w-10 items-center justify-center rounded-md bg-white p-2 text-gray-400"
+                  className="-mr-2 flex h-10 w-10 items-center justify-center border-none outline-none bg-white p-2 text-gray-400"
                   onClick={() => props.setMobileFiltersOpen(false)}
                 >
                   <span className="sr-only">Close menu</span>
-                  <XMarkIcon className="h-6 w-6" aria-hidden="true" />
+                  <ImCross className="text-xl text-gray-900" />
                 </button>
               </div>
 
               {/* Filters */}
-              <form className="mt-4 border-t border-gray-200">
-                {filters.map((section) => (
-                  <Disclosure
-                    as="div"
-                    key={section.id}
-                    className="border-t border-gray-200 px-4 py-6"
-                  >
+              <form className="mt-4 ">
+                {props.filters.map((section) => (
+                  <Disclosure as="div" key={section.id} className=" px-4 py-6">
                     {({ open }) => (
                       <>
                         <h3 className="-mx-2 -my-3 flow-root">
-                          <Disclosure.Button className="flex w-full items-center justify-between bg-white px-2 py-3 text-gray-400 hover:text-gray-500">
-                            <span className="font-medium text-gray-900">
+                          <Disclosure.Button className="flex w-full items-center justify-between bg-white px-2 py-3">
+                            <span className="font-semibold text-xl text-gray-900 ">
                               {section.name}
                             </span>
                             <span className="ml-6 flex items-center">
                               {open ? (
-                                <MinusIcon
-                                  className="h-5 w-5"
-                                  aria-hidden="true"
-                                />
+                                <FaMinus className="text-xl" />
                               ) : (
-                                <PlusIcon
-                                  className="h-5 w-5"
-                                  aria-hidden="true"
-                                />
+                                <FaPlus className="text-xl" />
                               )}
                             </span>
                           </Disclosure.Button>
@@ -1011,7 +963,11 @@ const MobileFilter = (props) => {
                             {section.options.map((option, optionIdx) => (
                               <div
                                 key={option.value}
-                                className="flex items-center"
+                                className={`flex items-center ${
+                                  option.label === "Category"
+                                    ? "border-b border-dashed border-gray-300"
+                                    : ""
+                                }`}
                               >
                                 <input
                                   id={`filter-mobile-${section.id}-${optionIdx}`}
@@ -1022,11 +978,11 @@ const MobileFilter = (props) => {
                                   onChange={(e) =>
                                     props.handleFilter(e, section, option)
                                   }
-                                  className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                                  className="h-4 w-4 rounded border-gray-300 text-gray-800 focus:outline-none"
                                 />
                                 <label
                                   htmlFor={`filter-mobile-${section.id}-${optionIdx}`}
-                                  className="ml-3 min-w-0 flex-1 text-gray-500"
+                                  className="ml-3 font-semibold text-lg text-gray-700"
                                 >
                                   {option.label}
                                 </label>
@@ -1050,24 +1006,30 @@ const MobileFilter = (props) => {
 const DesktopFilter = (props) => {
   return (
     <form className="hidden lg:block">
-      {filters.map((section) => (
+      {props.filters.map((section) => (
         <Disclosure
           as="div"
           key={section.id}
-          className="border-b border-gray-200 py-6"
+          className="border-b border-dashed border-gray-300 py-6"
         >
           {({ open }) => (
             <>
               <h3 className="-my-3 flow-root">
-                <Disclosure.Button className="flex w-full items-center justify-between bg-white py-3 text-sm text-gray-400 hover:text-gray-500">
-                  <span className="font-medium text-gray-900">
+                <Disclosure.Button className="flex w-full items-center justify-between bg-white py-3 ">
+                  <span className="font-semibold text-xl text-gray-900">
                     {section.name}
                   </span>
                   <span className="ml-6 flex items-center">
                     {open ? (
-                      <MinusIcon className="h-5 w-5" aria-hidden="true" />
+                      <MinusIcon
+                        className="h-6 w-6 font-bold"
+                        aria-hidden="true"
+                      />
                     ) : (
-                      <PlusIcon className="h-5 w-5" aria-hidden="true" />
+                      <PlusIcon
+                        className="h-6 w-6 font-bold"
+                        aria-hidden="true"
+                      />
                     )}
                   </span>
                 </Disclosure.Button>
@@ -1083,11 +1045,11 @@ const DesktopFilter = (props) => {
                         type="checkbox"
                         defaultChecked={option.checked}
                         onChange={(e) => props.handleFilter(e, section, option)}
-                        className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
+                        className="h-4 w-4 rounded border-gray-300 text-gray-800 focus:outline-none"
                       />
                       <label
                         htmlFor={`filter-${section.id}-${optionIdx}`}
-                        className="ml-3 text-sm text-gray-600"
+                        className="ml-3 text-lg text-gray-700"
                       >
                         {option.label}
                       </label>
@@ -1106,38 +1068,44 @@ const DesktopFilter = (props) => {
 const ProductGrid = (props) => {
   // console.log("In ProductGrid");
   // console.log(props.products);
+
+  const { date, month } = getNextDatePlusFive();
+  const suffix = getDaySuffix(date);
+
   return (
     <div className="bg-white">
+      {props.status === "loading" ? (
+        <div className="flex items-center justify-center">
+          <RotatingLines
+            visible={true}
+            height="70"
+            width="70"
+            color="#212020"
+            barColor="#212020"
+            strokeWidth="5"
+            animationDuration="0.75"
+            ariaLabel="rotating-lines-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+          />
+        </div>
+      ) : null}
       {props.products && (
         <div className="mx-auto max-w-2xl px-4 py-0 sm:px-6 sm:py-0 lg:max-w-7xl lg:px-8">
-          <div className="mt-6 grid xl:grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
-            {props.status === "loading" ? (
-              <ColorRing
-                visible={true}
-                height="80"
-                width="80"
-                ariaLabel="blocks-loading"
-                wrapperStyle={{}}
-                wrapperClass="blocks-wrapper"
-                colors={["#e15b64", "#f47e60", "#f8b26a", "#abbd81", "#849b87"]}
-              />
-            ) : null}
-            {props.products.map((product) => (
-              <Link to={`/product-detail/${product.id}`}>
-                <div
-                  key={product.id}
-                  className="group relative border-solid border-2 p-2 border-gray-200"
-                >
-                  <div className="min-h-60 aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-60">
+          <div className="mt-6 grid xl:grid-cols-3 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3 xl:gap-x-8">
+            {props.products.map((product, index) => (
+              <Link to={`/product-detail/${product.id}`} key={index}>
+                <div key={product.id} className="group relative">
+                  <div className=" aspect-h-1 aspect-w-0 w-full overflow-hidden border border-gray-300 hover:border-none bg-gray-200 lg:aspect-none h-100 lg:h-90 hover:rounded-lg hover:shadow-md">
                     <img
-                      src={product.imageSrc}
+                      src={product.thumbnail}
                       alt={product.title}
                       className="h-full w-full object-cover object-center lg:h-full lg:w-full"
                     />
                   </div>
                   <div className="mt-4 flex justify-between">
                     <div>
-                      <h3 className="text-sm text-gray-700">
+                      <h3 className="text-xl text-gray-800">
                         <div>
                           <span
                             aria-hidden="true"
@@ -1146,28 +1114,37 @@ const ProductGrid = (props) => {
                           {product.title}
                         </div>
                       </h3>
-                      <p className="mt-1 text-sm text-gray-500">
-                        <StarIcon className="w-6 h-6 inline"></StarIcon>
-                        <span className="align-bottom">{product.rating}</span>
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">
-                        ${discountedPrice(product)}
-                      </p>
-                      <p className="text-sm font-medium line-through text-gray-400">
-                        ${product.price}
-                      </p>
                     </div>
                   </div>
+                  <div className="flex flex-row mt-2">
+                    <p className="text-xl sm:text-sm md:text-md lg:text-xl font-semibold text-gray-900">
+                      ₹{product.discountPrice}
+                    </p>
+                    <p className="text-xl  sm:text-sm md:text-md lg:text-xl font-semibold text-gray-400 ml-2 line-through">
+                      ₹{product.price}
+                    </p>
+                    <p className="text-xl sm:text-sm md:text-md lg:text-xl font-semibold  ml-2 text-green-500">
+                      ({product.discountPercentage}% OFF)
+                    </p>
+                  </div>
+                  <div className="flex flex-row mt-2">
+                    <p className="text-lg sm:text-sm md:text-md lg:text-xl font-semibold text-gray-400">
+                      Free delivery by {date}
+                      {suffix} {month}
+                    </p>
+                  </div>
                   {product.deleted && (
-                    <div>
-                      <p className="text-sm text-red-400">product deleted</p>
+                    <div className="mt-1">
+                      <p className="text-lg font-semibold text-red-400">
+                        Product deleted
+                      </p>
                     </div>
                   )}
                   {product.stock <= 0 && (
-                    <div>
-                      <p className="text-sm text-red-400">out of stock</p>
+                    <div className="mt-1">
+                      <p className="text-lg font-semibold text-red-400">
+                        Out of stock
+                      </p>
                     </div>
                   )}
                 </div>

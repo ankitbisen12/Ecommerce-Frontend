@@ -608,3 +608,20 @@ for (let key in sort) {
 }
 
 console.log(queryString);
+
+
+
+//TODO: 
+//1)On clicking input type checkbox remove outline
+//2)Implement Rating
+//3)Sort on the basis of Ratings.
+//4)Adjust size of order id in order success page
+//5)
+
+// Payment intent is just like payslip before payment
+//Apka frontend ek rest api call karega
+//Woh rest api stripe ko call karega 
+
+
+//TODO: After Build
+// 1)Remove http://localhost:4000 =>/

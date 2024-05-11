@@ -11,4 +11,4 @@ const Protected = (props) => {
   return props.children;
 };
 
-export default Protected
+export default Protected;

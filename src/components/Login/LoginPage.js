@@ -3,9 +3,9 @@ import Login from './../../features/auth/Login';
 
 const LoginPage = () => {
   return (
-    <div>
+    <React.Fragment>
        <Login />
-    </div>
+    </React.Fragment>
   )
 }
 

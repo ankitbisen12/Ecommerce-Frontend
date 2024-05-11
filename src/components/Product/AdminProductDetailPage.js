@@ -4,9 +4,10 @@ import AdminProductDetail from "../../features/admin/AdminProductDetail";
 
 const AdminProductDetailPage = () => {
   return (
-    <Navbar>
+    <React.Fragment>
+      <Navbar></Navbar>
       <AdminProductDetail></AdminProductDetail>
-    </Navbar>
+    </React.Fragment>
   );
 };
 

@@ -38,8 +38,13 @@ export const fetchProductByIdAsync = createAsyncThunk(
 
 export const fetchProductsByFilterAsync = createAsyncThunk(
   "product/fetchProductsByFilters",
-  async ({ filter, sort, pagination,admin }) => {
-    const response = await fetchProductsByFilters(filter, sort, pagination,admin);
+  async ({ filter, sort, pagination, admin }) => {
+    const response = await fetchProductsByFilters(
+      filter,
+      sort,
+      pagination,
+      admin
+    );
     // The value we return becomes the `fulfilled` action payload
     return response.data;
   }
@@ -56,16 +61,22 @@ export const fetchCategoriesAsync = createAsyncThunk(
 
 export const createProductAsync = createAsyncThunk(
   "product/createProduct",
-  async (product) => {
+  async ({ product, toast }) => {
     const response = await createProduct(product);
+    toast.success("Product Created", {
+      position: toast.POSITION.BOTTOM_CENTER,
+    });
     return response.data;
   }
 );
 
 export const updateProductAsync = createAsyncThunk(
   "product/updateProduct",
-  async (update) => {
-    const response = await updateProduct(update);
+  async ({ product, toast, message }) => {
+    const response = await updateProduct(product);
+    toast.info(message, {
+      position: toast.POSITION.TOP_CENTER,
+    });
     return response.data;
   }
 );
@@ -152,6 +163,6 @@ export const selectCategories = (state) => state.product.categories;
 export const selectBrands = (state) => state.product.brands;
 export const selectTotalItems = (state) => state.product.totalItems;
 export const selectProductById = (state) => state.product.selectedProduct;
-export const selectedStatus = state=>state.product.status;
+export const selectedStatus = (state) => state.product.status;
 
 export default productSlice.reducer;

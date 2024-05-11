@@ -15,11 +15,99 @@ import Modal from "../../common/Modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
+const colors = [
+  {
+    name: "White",
+    class: "bg-white",
+    selectedClass: "ring-gray-400",
+    id: "white",
+  },
+  {
+    name: "Gray",
+    class: "bg-gray-400",
+    selectedClass: "ring-gray-400",
+    id: "Gray",
+  },
+  {
+    name: "Black",
+    class: "bg-gray-900",
+    selectedClass: "ring-gray-900",
+    id: "black",
+  },
+  {
+    name: "Orange",
+    class: "bg-orange-600",
+    selectedClass: "ring-orange-600",
+    id: "Orange",
+  },
+  {
+    name: "Red",
+    class: "bg-red-900",
+    selectedClass: "ring-red-900",
+    id: "Red",
+  },
+  {
+    name: "Sky",
+    class: "bg-sky-300",
+    selectedClass: "ring-sky-300",
+    id: "Sky",
+  },
+  {
+    name: "Cyan",
+    class: "bg-cyan-700",
+    selectedClass: "ring-cyan-700",
+    id: "Cyan",
+  },
+  {
+    name: "Blue",
+    class: "bg-blue-400",
+    selectedClass: "ring-blue-400",
+    id: "Blue",
+  },
+  {
+    name: "Purple",
+    class: "bg-purple-300",
+    selectedClass: "ring-purple-300",
+    id: "Purple",
+  },
+  {
+    name: "Amber",
+    class: "bg-amber-950",
+    selectedClass: "ring-amber-950",
+    id: "Amber",
+  },
+  {
+    name: "Teal",
+    class: "bg-teal-700",
+    selectedClass: "ring-teal-700",
+    id: "Teal",
+  },
+];
+
+const sizes = [
+  { name: "XXS", inStock: false, id: "xxs" },
+  { name: "XS", inStock: true, id: "xs" },
+  { name: "S", inStock: true, id: "s" },
+  { name: "M", inStock: true, id: "m" },
+  { name: "L", inStock: true, id: "l" },
+  { name: "XL", inStock: true, id: "xl" },
+  { name: "2XL", inStock: true, id: "2xl" },
+  { name: "3XL", inStock: true, id: "3xl" },
+];
+
+// const highlights = [
+//   "Hand cut and sewn locally",
+//   "Dyed with our proprietary colors",
+//   "Pre-washed & pre-shrunk",
+//   "Ultra-soft 100% cotton",
+// ];
+
 const ProductForm = () => {
   const dispatch = useDispatch();
   const brands = useSelector(selectBrands);
   const categories = useSelector(selectCategories);
   const selectedProduct = useSelector(selectProductById);
+  // console.log("SelectedProduct", selectedProduct);
   const [openModal, setOpenModal] = useState(null);
   const {
     register,
@@ -49,20 +137,37 @@ const ProductForm = () => {
       setValue("image1", selectedProduct.images[0]);
       setValue("image2", selectedProduct.images[1]);
       setValue("image3", selectedProduct.images[2]);
+      setValue("image4", selectedProduct.images[3]);
       setValue("brand", selectedProduct.brand);
       setValue("category", selectedProduct.category);
+      let highlightt = selectedProduct.highlights.join(",");
+      // console.log("Highlightt", highlightt);
+      setValue("highlights", highlightt);
+      setValue(
+        "sizes",
+        selectedProduct.sizes.map((size) => size.id)
+      );
+      setValue(
+        "colors",
+        selectedProduct.colors.map((color) => color.id)
+      );
     }
   }, [selectedProduct, setValue, params.id]);
 
   const handleDelete = () => {
     const product = { ...selectedProduct };
     product.deleted = true;
-    console.log(product);
-    dispatch(updateProductAsync(product));
-
-    toast.success("Product deleted scuccessfully", {
-      position: toast.POSITION.TOP_CENTER,
-    });
+    // console.log(product);
+    dispatch(
+      updateProductAsync({
+        product,
+        toast,
+        message: "Product deleted scuccessfully",
+      })
+    );
+    // toast.success("Product deleted scuccessfully", {
+    //   position: toast.POSITION.TOP_CENTER,
+    // });
   };
 
   return (
@@ -70,7 +175,7 @@ const ProductForm = () => {
       <form
         noValidate
         onSubmit={handleSubmit((data) => {
-          console.log(data);
+          console.log("Data inside ProductForm", data);
           const product = { ...data };
           product.images = [
             product.image1,
@@ -78,10 +183,18 @@ const ProductForm = () => {
             product.image3,
             product.thumbnail,
           ];
-          product.rating = 0;
+          product.colors = product.colors.map((color) =>
+            colors.find((clr) => clr.id === color)
+          );
+          // console.log(product);
+          product.sizes = product.sizes.map((size) =>
+            sizes.find((sz) => sz.id === size)
+          );
+          product.highlights = product.highlights.split(",");
           product.price = +product.price;
           product.discountPercentage = +product.discountPercentage;
           product.stock = +product.stock;
+          product.rating = +product.rating;
           delete product["image1"];
           delete product["image2"];
           delete product["image3"];
@@ -89,19 +202,19 @@ const ProductForm = () => {
           if (params.id) {
             product.id = params.id;
             product.rating = selectedProduct.rating || 0;
-            dispatch(updateProductAsync(product));
-            toast.success("Product Updated", {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
+            dispatch(
+              updateProductAsync({ product, toast, message: "Product Updated" })
+            );
+            // toast.success("Product Updated", {
+            //   position: toast.POSITION.BOTTOM_CENTER,
+            // });
           } else {
-            dispatch(createProductAsync(product));
-            toast.success("Product Created", {
-              position: toast.POSITION.BOTTOM_CENTER,
-            });
+            dispatch(createProductAsync({ product, toast }));
+
             //TODO: these alerts should check if API failed
             reset();
           }
-          console.log(product);
+          // console.log(product);
         })}
       >
         <div className="space-y-12">
@@ -173,6 +286,77 @@ const ProductForm = () => {
                   </select>
                 </div>
               </div>
+              <div className="col-span-full">
+                <label
+                  htmlFor="brand"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Colors
+                </label>
+                <div className="mt-2">
+                  {colors.map((color) => {
+                    return (
+                      <span>
+                        <input
+                          type="checkbox"
+                          {...register("colors", {
+                            required: "color is required",
+                          })}
+                          key={color.id}
+                          value={color.id}
+                        />{" "}
+                        {color.name}
+                      </span>
+                    );
+                  })}
+                </div>
+              </div>
+              <div className="col-span-full">
+                <label
+                  htmlFor="brand"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Sizes
+                </label>
+                <div className="mt-2">
+                  {sizes.map((size) => {
+                    return (
+                      <React.Fragment>
+                        <input
+                          type="checkbox"
+                          {...register("sizes", {
+                            required: "size is required",
+                          })}
+                          key={size.id}
+                          value={size.id}
+                        />{" "}
+                        {size.name}
+                      </React.Fragment>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="col-span-full">
+                <label
+                  htmlFor="highlights"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Highlights (Enter all highlights separated by commas)
+                </label>
+                <div className="mt-2">
+                  <textarea
+                    id="highlights"
+                    {...register("highlights", {
+                      required: "Highlights is required",
+                    })}
+                    rows={3}
+                    className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                    defaultValue={""}
+                  />
+                </div>
+              </div>
+
               <div className="col-span-full">
                 <label
                   htmlFor="category"
@@ -255,6 +439,27 @@ const ProductForm = () => {
                         min: 0,
                       })}
                       id="stock"
+                      className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div className="sm:col-span-2">
+                <label
+                  htmlFor="rating"
+                  className="block text-sm font-medium leading-6 text-gray-900"
+                >
+                  Rating
+                </label>
+                <div className="mt-2">
+                  <div className="flex rounded-md pl-2 shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
+                    <input
+                      type="number"
+                      {...register("rating", {
+                        required: "Rating is required",
+                        min: 0,
+                      })}
+                      id="rating"
                       className="block flex-1 border-0 bg-transparent py-1.5 pl-1 text-gray-900 placeholder:text-gray-400 focus:ring-0 sm:text-sm sm:leading-6"
                     />
                   </div>

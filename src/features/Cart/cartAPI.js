@@ -1,4 +1,5 @@
-// A mock function to mimic making an async request for data
+// method for adding items to cart ,the catch is that we don't need to pass id here 
+// for fetching particular customer data it is reterive from backend
 export function addToCart(item) {
   return new Promise(async (resolve) => {
     const response = await fetch("http://localhost:4000/api/v1/cart", {
@@ -12,11 +13,12 @@ export function addToCart(item) {
   });
 }
 
-export function fetchItemsByUserId(userId) {
+// method for fetching cart items
+export function fetchItemsByUserId() {
   return new Promise(async (resolve) => {
     //TODO:we will not hard-coded server URL here
     const response = await fetch(
-      "http://localhost:4000/api/v1/cart?user=" + userId
+      "http://localhost:4000/api/v1/cart"
     );
     const data = await response.json();
     // console.log(data);
@@ -24,6 +26,7 @@ export function fetchItemsByUserId(userId) {
   });
 }
 
+// method for updating cart 
 export function updateCart(update) {
   return new Promise(async (resolve) => {
     const response = await fetch("http://localhost:4000/api/v1/cart/" + update.id, {
@@ -38,7 +41,7 @@ export function updateCart(update) {
 }
 
 export function deleteItemFromCart(itemId) {
-  console.log(itemId);
+  // console.log(itemId);
   return new Promise(async (resolve) => {
     const response = await fetch("http://localhost:4000/api/v1/cart/" + itemId, {
       method: "DELETE",
@@ -51,11 +54,13 @@ export function deleteItemFromCart(itemId) {
   });
 }
 
-export function resetCart(userId) {
-  //get all items of user's cart - and then delete the cart.
+export function resetCart() {
+  // get all items of user's cart - and then delete the cart.
   return new Promise(async (resolve) => {
-    const response = await fetchItemsByUserId(userId);
+    //Step 1:- Get all items of user's cart
+    const response = await fetchItemsByUserId();
     const items = response.data;
+    //Step 2:- delete all items of cart 
     for (let item of items) {
       await deleteItemFromCart(item.id);
     }

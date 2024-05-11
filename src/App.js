@@ -2,14 +2,17 @@ import React, { useEffect } from "react";
 import Home from "./components/Home/Home";
 import LoginPage from "./components/Login/LoginPage";
 import SignUpPage from "./components/SignUp/SignUpPage";
-import Checkout from "./components/Checkout/Checkout";
 import "./App.css";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import CartPage from "./components/Cart/CartPage";
 import ProductDetailPage from "./components/Product/ProductDetailPage";
 import Protected from "./features/auth/Protected";
 import { useDispatch, useSelector } from "react-redux";
-import { selectLoggedInUser } from "./features/auth/authSlice";
+import {
+  checkAuthAsync,
+  selectCheckedUser,
+  selectLoggedInUser,
+} from "./features/auth/authSlice";
 import { fetchItemsByUserIdAsync } from "./features/Cart/cartSlice";
 import PageNotFound from "./components/404";
 import OrderSuccessPage from "./components/OrderSuccessPage";
@@ -22,6 +25,17 @@ import AdminHome from "./components/Home/AdminHome";
 import ProtectedAdmin from "./features/auth/ProtectedAdmin";
 import AdminProductFormPage from "./components/Product/AdminProductFormPage";
 import AdminOrderPage from "./components/AdminOrdersPage";
+import ResetPasswordPage from "./components/User/ResetPasswordPage";
+import { positions, Provider } from "react-alert";
+// import AlertTemplate from "react-alert-template-basic";
+import EmptyCartPage from "./components/Cart/EmptyCartPage";
+import CheckoutPage from "./components/Checkout/CheckoutPage";
+import StripeCheckout from "./components/stripe/StripeCheckout";
+
+// const options = {
+//   timeout: 5000,
+//   position: positions.BOTTOM_LEFT,
+// };
 
 const router = createBrowserRouter([
   {
@@ -57,10 +71,18 @@ const router = createBrowserRouter([
     ),
   },
   {
+    path: "/empty-cart",
+    element: (
+      <Protected>
+        <EmptyCartPage></EmptyCartPage>
+      </Protected>
+    ),
+  },
+  {
     path: "/Checkout",
     element: (
       <Protected>
-        <Checkout></Checkout>
+        <CheckoutPage></CheckoutPage>
       </Protected>
     ),
   },
@@ -106,7 +128,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/order-success/:id",
-    element: <OrderSuccessPage></OrderSuccessPage>,
+    element: (
+      <Protected>
+        <OrderSuccessPage></OrderSuccessPage>,
+      </Protected>
+    ),
   },
   {
     path: "/orders",
@@ -128,6 +154,18 @@ const router = createBrowserRouter([
     element: <ForgotPasswordPage></ForgotPasswordPage>,
   },
   {
+    path: "/reset-password",
+    element: <ResetPasswordPage></ResetPasswordPage>,
+  },
+  {
+    path: "/stripe-checkout",
+    element: (
+      <Protected>
+        <StripeCheckout></StripeCheckout>
+      </Protected>
+    ),
+  },
+  {
     path: "*",
     element: <PageNotFound></PageNotFound>,
   },
@@ -136,18 +174,30 @@ const router = createBrowserRouter([
 function App() {
   const dispatch = useDispatch();
   const user = useSelector(selectLoggedInUser);
+  const userChecked = useSelector(selectCheckedUser);
+
+  useEffect(() => {
+    dispatch(checkAuthAsync());
+  }, [dispatch]);
 
   useEffect(() => {
     if (user) {
-      dispatch(fetchItemsByUserIdAsync(user.id));
-      dispatch(fetchLoggedInUserAsync(user.id));
+      dispatch(fetchItemsByUserIdAsync());
+      //we can get req.user by token on backend so no need to given in front-end
+      dispatch(fetchLoggedInUserAsync());
     }
   }, [dispatch, user]);
 
   return (
-    <div>
-      <RouterProvider router={router} />
-      {/* Link must be inside the Provider */}
+    <div className="recursive-pp">
+      {/* {userChecked && <RouterProvider router={router} />}
+      Link must be inside the Provider */}
+
+      {userChecked && (
+        <Provider >
+          <RouterProvider router={router} />
+        </Provider>
+      )}
     </div>
   );
 }
