@@ -625,3 +625,6 @@ console.log(queryString);
 
 //TODO: After Build
 // 1)Remove http://localhost:4000 =>/
+//2) Add environment variables in Vercel
+//3)Give full Url in return_url
+

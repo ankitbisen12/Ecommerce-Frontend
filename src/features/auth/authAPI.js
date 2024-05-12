@@ -1,7 +1,7 @@
 //for creating user
 export function createUser(userData) {
   return new Promise(async (resolve) => {
-    const response = await fetch("http://localhost:4000/api/v1/auth/signup", {
+    const response = await fetch("/api/v1/auth/signup", {
       method: "POST",
       body: JSON.stringify(userData),
       headers: { "content-type": "application/json" },
@@ -15,7 +15,7 @@ export function createUser(userData) {
 export function loginUser(loginInfo) {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch("http://localhost:4000/api/v1/auth/login", {
+      const response = await fetch("/api/v1/auth/login", {
         method: "POST",
         body: JSON.stringify(loginInfo),
         headers: { "content-type": "application/json" },
@@ -37,7 +37,7 @@ export function loginUser(loginInfo) {
 export function checkAuth() {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch("http://localhost:4000/api/v1/auth/check");
+      const response = await fetch("/api/v1/auth/check");
       // console.log(response);
       if (response.ok) {
         const data = await response.json();
@@ -56,11 +56,11 @@ export function checkAuth() {
 export function signOut() {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch("http://localhost:4000/api/v1/auth/logout");
+      const response = await fetch("/api/v1/auth/logout");
       // console.log(response);
       if (response.ok) {
         // const data = await response.json();
-        resolve({ data:'success' });
+        resolve({ data: "success" });
       } else {
         const error = await response.text();
         reject(error);
@@ -74,7 +74,7 @@ export function signOut() {
 export function resetPasswordRequest(email) {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch("http://localhost:4000/api/v1/mail", {
+      const response = await fetch("/api/v1/mail", {
         method: "POST",
         body: JSON.stringify({ email }),
         headers: { "content-type": "application/json" },
@@ -96,7 +96,7 @@ export function resetPasswordRequest(email) {
 export function resetPassword(data) {
   return new Promise(async (resolve, reject) => {
     try {
-      const response = await fetch("http://localhost:4000/api/v1/mail/password-reset", {
+      const response = await fetch("/api/v1/mail/password-reset", {
         method: "POST",
         body: JSON.stringify(data),
         headers: { "content-type": "application/json" },

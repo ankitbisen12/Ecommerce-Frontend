@@ -1,8 +1,8 @@
-// method for adding items to cart ,the catch is that we don't need to pass id here 
+// method for adding items to cart ,the catch is that we don't need to pass id here
 // for fetching particular customer data it is reterive from backend
 export function addToCart(item) {
   return new Promise(async (resolve) => {
-    const response = await fetch("http://localhost:4000/api/v1/cart", {
+    const response = await fetch("/api/v1/cart", {
       method: "POST",
       body: JSON.stringify(item),
       headers: { "content-type": "application/json" },
@@ -17,19 +17,17 @@ export function addToCart(item) {
 export function fetchItemsByUserId() {
   return new Promise(async (resolve) => {
     //TODO:we will not hard-coded server URL here
-    const response = await fetch(
-      "http://localhost:4000/api/v1/cart"
-    );
+    const response = await fetch("/api/v1/cart");
     const data = await response.json();
     // console.log(data);
     resolve({ data });
   });
 }
 
-// method for updating cart 
+// method for updating cart
 export function updateCart(update) {
   return new Promise(async (resolve) => {
-    const response = await fetch("http://localhost:4000/api/v1/cart/" + update.id, {
+    const response = await fetch("/api/v1/cart/" + update.id, {
       method: "PATCH",
       body: JSON.stringify(update),
       headers: { "content-type": "application/json" },
@@ -43,7 +41,7 @@ export function updateCart(update) {
 export function deleteItemFromCart(itemId) {
   // console.log(itemId);
   return new Promise(async (resolve) => {
-    const response = await fetch("http://localhost:4000/api/v1/cart/" + itemId, {
+    const response = await fetch("/api/v1/cart/" + itemId, {
       method: "DELETE",
       body: JSON.stringify(),
       headers: { "content-type": "application/json" },
@@ -60,7 +58,7 @@ export function resetCart() {
     //Step 1:- Get all items of user's cart
     const response = await fetchItemsByUserId();
     const items = response.data;
-    //Step 2:- delete all items of cart 
+    //Step 2:- delete all items of cart
     for (let item of items) {
       await deleteItemFromCart(item.id);
     }

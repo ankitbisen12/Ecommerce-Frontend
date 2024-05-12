@@ -61,7 +61,7 @@ const CheckoutForm = () => {
       elements,
       confirmParams: {
         // Make sure to change this to your payment completion page
-        return_url: `http://localhost:4000/order-success/${currentOrder.id}`,
+        return_url: `/order-success/${currentOrder.id}`,
       },
     });
 
@@ -73,7 +73,7 @@ const CheckoutForm = () => {
     if (error.type === "card_error" || error.type === "validation_error") {
       setMessage(error.message);
     } else {
-      console.log("Error",error);
+      console.log("Error", error);
       setMessage("An unexpected error occurred.");
     }
 
@@ -81,8 +81,8 @@ const CheckoutForm = () => {
   };
 
   const paymentElementOptions = {
-    layout: "tabs"
-  }
+    layout: "tabs",
+  };
 
   return (
     <form id="payment-form" onSubmit={handleSubmit}>
